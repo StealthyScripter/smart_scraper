@@ -1,0 +1,35 @@
+# Virtual Environment
+venv/
+.env
+.env.*
+
+# Python Cache Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+
+# Selenium / Browser Drivers
+chromedriver
+chromedriver*
+chrome*
+*.exe
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data Files (Scraped Data)
+data/*.csv
+data/*.json
+data/*.xlsx
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
