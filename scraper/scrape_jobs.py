@@ -7,42 +7,53 @@ driver = webdriver.Chrome()
 
 job_data = []
 
-for page in range(0,3):
+for page in range(0,5):
 
-    url = f"https://www.linkedin.com/jobs/search/?keywords=data%20analyst&start={page*25}"
+    url = f"https://www.linkedin.com/jobs/search/?keywords=data%20analyst&location=United%20States&start={page*25}"
 
     driver.get(url)
 
     time.sleep(5)
 
-    jobs = driver.find_elements(By.CLASS_NAME, "base-card")
+    jobs = driver.find_elements(By.CSS_SELECTOR, ".base-card")
+
+    print(f"Page {page} jobs found:", len(jobs))
 
     for job in jobs:
 
         try:
-            title = job.find_element(By.CLASS_NAME, "base-search-card__title").text
+            title = job.find_element(By.CSS_SELECTOR, ".base-search-card__title").text
         except:
             title = None
 
         try:
-            company = job.find_element(By.CLASS_NAME, "base-search-card__subtitle").text
+            company = job.find_element(By.CSS_SELECTOR, ".base-search-card__subtitle a").text
         except:
             company = None
 
         try:
-            location = job.find_element(By.CLASS_NAME, "job-search-card__location").text
+            location = job.find_element(By.CSS_SELECTOR, ".job-search-card__location").text
         except:
             location = None
 
-        job_data.append({
-            "title": title,
-            "company": company,
-            "location": location
-        })
+        try:
+            date = job.find_element(By.CSS_SELECTOR, "time").text
+        except:
+            date = None
+
+        if title and company:
+            job_data.append({
+                "title": title,
+                "company": company,
+                "location": location,
+                "date": date
+            })
 
 driver.quit()
 
 df = pd.DataFrame(job_data)
+
+df = df.drop_duplicates()
 
 df.to_csv("data/raw_jobs.csv", index=False)
 
