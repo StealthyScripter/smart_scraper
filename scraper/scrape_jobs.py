@@ -7,54 +7,91 @@ driver = webdriver.Chrome()
 
 job_data = []
 
-for page in range(0,5):
+#Number of pages to scrape per keyword (25 jobs per page)
+pages = 5
 
-    url = f"https://www.linkedin.com/jobs/search/?keywords=data%20analyst&location=United%20States&start={page*25}"
+# List of keywords to search for. You can modify this list based on your needs.
+keywords = [
+    "data analyst",
+    "software engineer",
+    "data engineer",
+    "system administrator",
+    "database administrator",
+    "devops engineer",
+    "machine learning engineer",
+    "backend developer",
+    "frontend developer",
+    "full stack developer"
+]
 
-    driver.get(url)
+for keyword in keywords:
 
-    time.sleep(5)
+    search = keyword.replace(" ", "%20")
 
-    jobs = driver.find_elements(By.CSS_SELECTOR, ".base-card")
+    print(f"\nSearching: {keyword}")
 
-    print(f"Page {page} jobs found:", len(jobs))
+    # Loop through the specified number of pages for each keyword
+    for page in range(0,pages):
 
-    for job in jobs:
+        url = f"https://www.linkedin.com/jobs/search/?keywords={search}&location=United%20States&start={page*25}"
 
-        try:
-            title = job.find_element(By.CSS_SELECTOR, ".base-search-card__title").text
-        except:
-            title = None
+        driver.get(url)
 
-        try:
-            company = job.find_element(By.CSS_SELECTOR, ".base-search-card__subtitle a").text
-        except:
-            company = None
+        time.sleep(5)
 
-        try:
-            location = job.find_element(By.CSS_SELECTOR, ".job-search-card__location").text
-        except:
-            location = None
+        jobs = driver.find_elements(By.CSS_SELECTOR, ".base-card")
 
-        try:
-            date = job.find_element(By.CSS_SELECTOR, "time").text
-        except:
-            date = None
+        print(f"Page {page} cards:", len(jobs))
 
-        if title and company:
-            job_data.append({
-                "title": title,
-                "company": company,
-                "location": location,
-                "date": date
-            })
+        for job in jobs:
+
+            try:
+                title = job.find_element(By.CSS_SELECTOR, ".base-search-card__title").text.strip()
+            except:
+                title = None
+
+            try:
+                company = job.find_element(By.CSS_SELECTOR, ".base-search-card__subtitle a").text.strip()
+            except:
+                company = None
+
+            try:
+                location = job.find_element(By.CSS_SELECTOR, ".job-search-card__location").text.strip()
+            except:
+                location = None
+
+            try:
+                date = job.find_element(By.CSS_SELECTOR, "time").text.strip()
+            except:
+                date = None
+
+            try:
+                link = job.find_element(By.CSS_SELECTOR, ".base-card__full-link").get_attribute("href")
+            except:
+                link = None
+
+            if title and company and location:
+                job_data.append({
+                    "title": title,
+                    "company": company,
+                    "location": location,
+                    "date": date,
+                    "search_role": keyword,
+                    "job_link": link
+                })
 
 driver.quit()
 
+# Create a DataFrame and remove duplicates based on title, company, and location
 df = pd.DataFrame(job_data)
 
-df = df.drop_duplicates()
+print("\nRows before dedup:", len(df))
+
+# duplicate rule: same title + company + location
+df = df.drop_duplicates(subset=["title", "company", "location"])
+
+print("Rows after dedup:", len(df))
 
 df.to_csv("data/raw_jobs.csv", index=False)
 
-print("Saved", len(df), "jobs")
+print("\nSaved jobs:", len(df))
