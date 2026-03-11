@@ -8,7 +8,7 @@ driver = webdriver.Chrome()
 job_data = []
 
 #Number of pages to scrape per keyword (25 jobs per page)
-pages = 5
+pages = 3
 
 # List of keywords to search for. You can modify this list based on your needs.
 keywords = [
